@@ -17,7 +17,22 @@ void setup(){
   Serial.print("Initializing LCD...\n");
   lcd.init(); 
   lcd.backlight();
+  lcd.clear();
+  
+  printToLCD(0, 0, "IoT Hydroponics v0.0...");
+  delay(1000);
+  printToLCD(1, 1, "Built by: Antreas Christofi");
+  delay(1000);
 
+  for(int i = 0; i < 28; i++){
+  lcd.scrollDisplayLeft();
+  delay(200);
+  }
+
+  clearLCD();
+
+  
+  
   //Pin Section
   Serial.print("Initalizing Pin I/O...\n");
   pinMode(2, OUTPUT);//Relay signal pin
@@ -45,11 +60,9 @@ void loop(){
 
   //enableRelay();
   //disableRelay();
-  //printToLCD("Hello World!");
-  delay(5000);
+  //delay(5000);
   //clearLCD();
-  updateSerial();
-  //debugNetStatus(1);//Current issue is mode 1
+  //updateSerial();
   //rstSIM900();
  
   }
@@ -57,9 +70,9 @@ void loop(){
 
 //*********************************************DISPLAY FCTS*******************************************//
 
-void printToLCD(String toPrint){
-  lcd.setCursor(0, 0);//0th col, 0th row
-  Serial.print(toPrint);
+void printToLCD(int col, int row, String toPrint){
+  lcd.setCursor(col, row);
+  Serial.print(toPrint + "\n");
   lcd.print(toPrint);
   }
 
@@ -83,30 +96,6 @@ void disableRelay(){
 
   
 //*********************************************GSM/GPRS FCTS*******************************************//
-void debugNetStatus(int mode){//This function is built to match the on/off characteristics of the network status LED of the 900.
-  
-    if(mode == 1){//SIM not registered to the network
-      digitalWrite(13, HIGH);   
-      delay(64);                // wait for 64ms
-      digitalWrite(13, LOW);    
-      delay(800);               // wait for 800ms
-    }
-    else if (mode == 2){//SIM registered to the network
-    
-      digitalWrite(13, HIGH);   
-      delay(64);                // wait for 64ms
-      digitalWrite(13, LOW);    
-      delay(3000);               // wait for 3000ms
-    }
-    else if (mode == 3){//GPRS connection established
-      digitalWrite(13, HIGH);   
-      delay(64);                // wait for 64ms
-      digitalWrite(13, LOW);    
-      delay(300);               // wait for 300ms
-      }
-    else
-      Serial.print("OFF | UNKNOWN STATE");
-  }
 
 void updateSerial()
 {

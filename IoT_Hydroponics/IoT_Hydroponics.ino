@@ -12,21 +12,17 @@ SoftwareSerial SIM900Serial(10,11);//SIM900 Tx ad Rx pins connected to pins 10 a
 //Set the LCD address to 0x27 for a 16 character, 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+//Comms section
 String msg;
 char call;//todo: experiment with String when MCU is online
-int state = 0;//current state, standby, FSM variable do not mess with
-boolean relayState = false;//false for off, true for on
-
 
 void setup(){
-  
-  //Serial Section
 
+  //Serial Section
   Serial.begin(19200);
+  SIM900Serial.begin(19200);
 
   //LCD Section
-  Serial.print("Initializing LCD...\n");
-  delay(2000);
   lcd.init(); 
   lcd.backlight();
   lcd.clear();
@@ -39,23 +35,13 @@ void setup(){
   clearLCD();
 
   //Pin Section
-  Serial.print("Initalizing Pin I/O...\n");
   pinMode(13, OUTPUT);//Onboard LED pin for debugging the NetLight of the SIM900
   pinMode(9, OUTPUT);//Software power on
   pinMode(3, OUTPUT);//Reset signal to SIM900
   pinMode(2, OUTPUT);//Relay signal pin
   digitalWrite(2, HIGH);//Disable relay on boot, active low
 
-  
-  //SIM900 Section
-  delay(1000);
-  Serial.print("Initializing SIM900 Serial...\n");
-  SIM900Serial.begin(19200);
-
-  SIM900Serial.println("AT+CNMI=2,2,0,0,0"); // AT cmd to show output on serial out
-  delay(5000);
-
-  clearLCD();
+  SIM900Serial.println("AT+CNMI=2,2,0,0,0\r"); // AT cmd to show output on serial out
 
   delay(1000);
   printToLCD(0, 0, "Boot-up complete...");
@@ -63,63 +49,29 @@ void setup(){
   ScrollText("L");
     
   clearLCD();
+  clearLCD();
   
   }
 
 void loop(){
 
-  switch (state)
-  {
-    case 0:{
-      Serial.println("------ STATE: STAND BY ------");
       ReceiveMessage();
-      delay(2000);
-      if(msg.indexOf("On")>=0){
-        state = 1;
-        break;
+      // if received command is to turn on relay
+      if(msg.indexOf("On")>=0)
+      {
+        EnableRelay();
+        // Send a sms back to confirm that the relay is turned on
+        SendMessage("Irrigation Started.");
       }
-      else if(msg.indexOf("Off")>=0){
-        state = 2;
-        break;
-      }
-      else{
-        state = 0;
-        break;
-      }
-      state = 0;//debug loopback  
-      break;
-    }
-      
-    case 1:{
-      Serial.println("------ STATE: WATER ON ------");
-      EnableRelay();
-      //delay (60UL * 60UL * 1000UL);//60 minutes; each 60 seconds, each 1000ms
-      delay(5000);//5s for testing
-      state = 2;
-      break;
-    }
-
-    case 2:{
-      Serial.println("------ STATE: WATER OFF ------");
-      DisableRelay();
-      state = 3;
-      break;
-    }
-
-    case 3:{
-      Serial.println("------ STATE: WATER COMPLETE ------");
-      SendMessage("Watering complete!");
-      state = 0;
-      break;
-    }
-     
-    default:{
-      Serial.println("Default reached");
-      break;
-    }
-        
-  }//END CASE
   
+      // if received command is to turn off relay
+      if(msg.indexOf("Off")>=0)
+      {
+        DisableRelay();
+        // Send a sms back to confirm that the relay is turned off
+        SendMessage("Irrigation Stopped.");
+  }
+     
 }//END LOOP
 
 
@@ -160,14 +112,14 @@ void clearLCD(){
 void EnableRelay(){
   digitalWrite(2, LOW); //Enable Relay, active low
   Serial.print("Log: Relay Enabled.\n");
-  relayState = true;
+  //relayState = true;
   delay(1000);
   }
 
 void DisableRelay(){
   digitalWrite(2, HIGH); //Disable Relay, active high
   Serial.print("Log: Relay Disabled.\n");
-  relayState = false;
+  //relayState = false;
   delay(1000);
   }
 

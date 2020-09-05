@@ -16,6 +16,10 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 String msg;
 char call;//todo: experiment with String when MCU is online
 
+//ISR timing section
+volatile int seconds = 0; //make it volatile because it is used inside the interrupt
+
+
 void setup(){
 
   //Serial Section
@@ -44,6 +48,7 @@ void setup(){
   SIM900Serial.println("AT+CNMI=2,2,0,0,0\r"); // AT cmd to show output on serial out
 
   delay(1000);
+  SetupTimer();
   printToLCD(0, 0, "Boot-up complete...");
   delay(500);
   ScrollText("L");
@@ -55,6 +60,8 @@ void setup(){
 
 void loop(){
 
+      //UpdateSerial();//Uncomment for debugging ONLY, gives direct access to Serial.
+      // DO NOT UNCOMMENT AND RUN WITH CODE BELOW, IT BREAKS
       ReceiveMessage();
       // if received command is to turn on relay
       if(msg.indexOf("On")>=0)
@@ -211,4 +218,34 @@ void RedialCall(){
   SIM900Serial.println("ATDL");
   Serial.println("Redialing....");
   delay(1000);
+}
+
+//*********************************************TIMER/ISR FUNCTIONS*******************************************//
+void SetupTimer(){
+  int frequency = 1; // in hz
+  //Interupt Service Routine and timer setup
+  noInterrupts();// kill interrupts until everybody is set up
+  //We use Timer 1 b/c it's the only 16 bit timer
+  TCCR1A = B00000000;//Register A all 0's since we're not toggling any pins
+  
+  // TCCR1B clock prescalers
+  // 0 0 1 clkI/O /1 (No prescaling)
+  // 0 1 0 clkI/O /8 (From prescaler)
+  // 0 1 1 clkI/O /64 (From prescaler)
+  // 1 0 0 clkI/O /256 (From prescaler)
+  // 1 0 1 clkI/O /1024 (From prescaler)
+  TCCR1B = B00001100;//bit 3 set for CTC mode, will call interrupt on counter match, bit 2 set to divide clock by 256, so 16MHz/256=62.5KHz
+  TIMSK1 = B00000010;//bit 1 set to call the interrupt on an OCR1A match
+  OCR1A  = (unsigned long)((62500UL / frequency) - 1UL);//our clock runs at 62.5kHz, which is 1/62.5kHz = 16us
+  interrupts();//restart interrupts
+}
+
+ISR(TIMER1_COMPA_vect){ //Interrupt Service Routine, Timer/Counter1 Compare Match A
+  seconds++;
+  if(seconds >= 60) { //set to however many seconds you want
+    Serial.println(micros());           // This code is what happens
+    seconds = 0;                        // after 'x' seconds
+    DisableRelay();
+    digitalWrite(13, !digitalRead(13)); //
+  }
 }

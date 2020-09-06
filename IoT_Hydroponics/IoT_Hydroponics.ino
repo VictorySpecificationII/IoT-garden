@@ -149,10 +149,10 @@ void SoftwarePowerOn(){
   digitalWrite(9, LOW);
   }
 
-//*********************************************GSM/GPRS FUNCTIONS*******************************************//
+//*********************************************SERIAL FUNCTIONS*******************************************//
 
 
-void UpdateSerial()
+void UpdateSerialConsole()
 {
   delay(500);
   while (Serial.available()) 

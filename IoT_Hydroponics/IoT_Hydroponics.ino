@@ -63,7 +63,6 @@ void loop(){
       //UpdateSerial();//Uncomment for debugging ONLY, gives direct access to Serial.
       // DO NOT UNCOMMENT AND RUN WITH CODE BELOW, IT BREAKS
       ReceiveMessage();
-      Serial.println(msg);
       // if received command is to turn on relay
       if(msg.indexOf("On")>=0)
       {

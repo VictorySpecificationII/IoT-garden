@@ -19,6 +19,8 @@ char call;//todo: experiment with String when MCU is online
 //ISR timing section
 volatile int seconds = 0; //make it volatile because it is used inside the interrupt
 
+//Relay section
+boolean relayState = false;
 
 void setup(){
 
@@ -120,7 +122,7 @@ void clearLCD(){
 void EnableRelay(){
   digitalWrite(2, LOW); //Enable Relay, active low
   Serial.print("Log: Relay Enabled.\n");
-  //relayState = true;
+  relayState = true;
   msg = "";
   delay(1000);
   }
@@ -128,7 +130,7 @@ void EnableRelay(){
 void DisableRelay(){
   digitalWrite(2, HIGH); //Disable Relay, active high
   Serial.print("Log: Relay Disabled.\n");
-  //relayState = false;
+  relayState = false;
   msg = "";//clear out message variable
   delay(1000);
   }
@@ -246,9 +248,11 @@ void SetupTimer(){
 ISR(TIMER1_COMPA_vect){ //Interrupt Service Routine, Timer/Counter1 Compare Match A
   seconds++;
   if(seconds >= 60) { //set to however many seconds you want
+    if(relayState == true){
     Serial.println(micros());           // This code is what happens
     seconds = 0;                        // after 'x' seconds
     DisableRelay();
     digitalWrite(13, !digitalRead(13)); //
+    }
   }
 }

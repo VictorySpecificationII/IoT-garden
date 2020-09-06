@@ -68,6 +68,7 @@ void loop(){
       // if received command is to turn on relay
       if(msg.indexOf("On")>=0)
       {
+        seconds = 0;//start counting from the moment the relay is enabled
         EnableRelay();
         // Send a sms back to confirm that the relay is turned on
         SendMessage("Irrigation Started.");

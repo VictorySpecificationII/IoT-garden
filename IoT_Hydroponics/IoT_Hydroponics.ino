@@ -63,6 +63,7 @@ void loop(){
       //UpdateSerial();//Uncomment for debugging ONLY, gives direct access to Serial.
       // DO NOT UNCOMMENT AND RUN WITH CODE BELOW, IT BREAKS
       ReceiveMessage();
+      Serial.println(msg);
       // if received command is to turn on relay
       if(msg.indexOf("On")>=0)
       {
@@ -77,6 +78,7 @@ void loop(){
         DisableRelay();
         // Send a sms back to confirm that the relay is turned off
         SendMessage("Irrigation Stopped.");
+        
   }
      
 }//END LOOP
@@ -120,6 +122,7 @@ void EnableRelay(){
   digitalWrite(2, LOW); //Enable Relay, active low
   Serial.print("Log: Relay Enabled.\n");
   //relayState = true;
+  msg = "";
   delay(1000);
   }
 
@@ -127,6 +130,7 @@ void DisableRelay(){
   digitalWrite(2, HIGH); //Disable Relay, active high
   Serial.print("Log: Relay Disabled.\n");
   //relayState = false;
+  msg = "";//clear out message variable
   delay(1000);
   }
 

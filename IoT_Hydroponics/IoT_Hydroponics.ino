@@ -62,7 +62,7 @@ void setup(){
 
 void loop(){
 
-      //UpdateSerial();//Uncomment for debugging ONLY, gives direct access to Serial.
+      UpdateSerialConsole();//Uncomment for debugging ONLY, gives direct access to Serial.
       // DO NOT UNCOMMENT AND RUN WITH CODE BELOW, IT BREAKS
       ReceiveMessage();
       // if received command is to turn on relay
@@ -155,14 +155,10 @@ void SoftwarePowerOn(){
 void UpdateSerialConsole()
 {
   delay(500);
-  while (Serial.available()) 
-  {
-    SIM900Serial.write(Serial.read());//Forward what Serial received to Software Serial Port
-  }
-  while(SIM900Serial.available()) 
-  {
-    Serial.write(SIM900Serial.read());//Forward what Software Serial received to Serial Port
-  }
+   if (SIM900Serial.available())
+       Serial.write(SIM900Serial.read());
+   if (Serial.available())
+       SIM900Serial.write(Serial.read());
 }
 
 //*********************************************GSM/DIAG FUNCTIONS*******************************************//

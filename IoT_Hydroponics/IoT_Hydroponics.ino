@@ -177,6 +177,17 @@ void CheckRegistrationStatus(){
   delay(2500);
   }
 
+void WakeFromSleepModeOne(){//run in setup function if needed
+   digitalWrite(3, LOW);
+   digitalWrite(3, HIGH);
+   delay(1);
+   SIM900Serial.print("AT");
+   delay(1);
+   SIM900Serial.print("AT+CSCLK=0");
+   delay(1);
+   digitalWrite(3, LOW);
+  }
+
 //*********************************************GSM/MESG FUNCTIONS*******************************************//
 void ReceiveMessage(){
 

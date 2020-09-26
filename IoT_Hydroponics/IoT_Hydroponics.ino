@@ -47,6 +47,10 @@ void setup(){
   pinMode(2, OUTPUT);//Relay signal pin
   digitalWrite(2, HIGH);//Disable relay on boot, active low
 
+  SoftwarePowerOn();
+
+  delay(20000);//Wait for the SIM900 to start
+
   SIM900Serial.println("AT+CNMI=2,2,0,0,0\r"); // AT cmd to show output on serial out
 
   delay(1000);

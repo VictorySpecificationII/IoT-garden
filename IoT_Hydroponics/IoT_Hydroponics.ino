@@ -125,6 +125,8 @@ void clearLCD(){
 //**********************************************RELAY FUNCTIONS********************************************//
 
 void EnableRelay(){
+  
+  delay(20000);
   digitalWrite(2, LOW); //Enable Relay, active low
   Serial.print("Log: Relay Enabled.\n");
   relayState = true;
@@ -137,7 +139,9 @@ void DisableRelay(){
   Serial.print("Log: Relay Disabled.\n");
   relayState = false;
   msg = "";//clear out message variable
-  delay(1000);
+  delay(5000);
+  //SoftwareShutDown();
+  
   }
 
 //*********************************************POWER FUNCTIONS*******************************************//
@@ -151,6 +155,24 @@ void SoftwarePowerOn(){
   digitalWrite(9, HIGH);
   delay(1000);
   digitalWrite(9, LOW);
+  }
+
+void SleepModeOne(){
+  Serial.println("Going to sleep zzzzzzzzz...");
+  delay(100);
+  SIM900Serial.println("AT+CSCLK=1");
+  delay(1000);
+  }
+
+void WakeFromSleepModeOne(){//run in setup function if needed
+   digitalWrite(3, LOW);
+   digitalWrite(3, HIGH);
+   delay(1);
+   SIM900Serial.print("AT");
+   delay(1);
+   SIM900Serial.print("AT+CSCLK=0");
+   delay(1);
+   digitalWrite(3, LOW);
   }
 
 //*********************************************SERIAL FUNCTIONS*******************************************//
@@ -177,16 +199,6 @@ void CheckRegistrationStatus(){
   delay(2500);
   }
 
-void WakeFromSleepModeOne(){//run in setup function if needed
-   digitalWrite(3, LOW);
-   digitalWrite(3, HIGH);
-   delay(1);
-   SIM900Serial.print("AT");
-   delay(1);
-   SIM900Serial.print("AT+CSCLK=0");
-   delay(1);
-   digitalWrite(3, LOW);
-  }
 
 //*********************************************GSM/MESG FUNCTIONS*******************************************//
 void ReceiveMessage(){
@@ -264,6 +276,7 @@ ISR(TIMER1_COMPA_vect){ //Interrupt Service Routine, Timer/Counter1 Compare Matc
     Serial.println(micros());           // This code is what happens
     seconds = 0;                        // after 'x' seconds
     DisableRelay();
+    SendMessage("Irrigation Stopped.");
     digitalWrite(13, !digitalRead(13)); //
     }
   }
